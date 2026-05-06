@@ -32,7 +32,7 @@ final class AdminUiController extends AbstractController
         $matches = $em->getRepository(SportMatch::class)->findBy([], ['id' => 'ASC']);
 
         return new Response($this->layout(
-            'Dashboard administration',
+            'Dashboard admin',
             $this->renderStats($users, $tournaments, $registrations, $matches)
             .$this->renderTournaments($tournaments, $users)
             .$this->renderRegistrations($registrations)
@@ -203,14 +203,21 @@ final class AdminUiController extends AbstractController
     private function renderUsers(array $users): string
     {
         $html = '<section><h2>Utilisateurs</h2><table><tr><th>ID</th><th>Nom</th><th>Email</th><th>Roles</th><th>Status</th></tr>';
+       
 
         foreach ($users as $user) {
+            $status = $user->getStatus();
+            $badgeClass = match($status){
+                'actif' => 'bg-green-500',
+                'suspendu' => 'bg-orange-500',
+                'banni' =>'bg-red-500'
+                };
             $html .= '<tr>
                 <td>'.$user->getId().'</td>
                 <td>'.$this->e($user->getFirstName().' '.$user->getLastName()).'</td>
                 <td>'.$this->e($user->getEmailAddress()).'</td>
                 <td>'.$this->e(implode(', ', $user->getRoles())).'</td>
-                <td><span class="badge">'.$this->e($user->getStatus()).'</span></td>
+                <td><span class="badge '.$badgeClass.'">'.$this->e($status).'</span></td>
             </tr>';
         }
 
@@ -243,6 +250,9 @@ final class AdminUiController extends AbstractController
         input, select { padding:7px; border:1px solid #d1d5db; border-radius:7px; }
         input[type=number] { width:60px; }
         .badge { background:#e5e7eb; padding:4px 8px; border-radius:999px; font-size:12px; }
+        .bg-green-500 { background:#10b981; color:white; }
+        .bg-orange-500 { background:#f59e0b; color:black; }
+        .bg-red-500 { background:#ef4444; color:white; }
         .inline { display:flex; gap:6px; align-items:center; }
     </style>
 </head>

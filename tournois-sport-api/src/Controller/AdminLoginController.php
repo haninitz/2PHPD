@@ -12,6 +12,11 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AdminLoginController extends AbstractController
 {
+    #[Route('/', name: 'home')]
+    public function home(): Response
+    {
+    return $this->redirectToRoute('login_admin');
+    }
     #[Route('/login-admin', name: 'login_admin', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
