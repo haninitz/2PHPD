@@ -1,29 +1,52 @@
 security:
     password_hashers:
-    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: auto
+
     providers:
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: emailAddress
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-                provider: app_user_provider
+            provider: app_user_provider
+
             json_login:
                 check_path: api_login
                 username_path: emailAddress
                 password_path: password
+
+            form_login:
+                login_path: login_admin
+                check_path: login_admin
+                username_parameter: emailAddress
+                password_parameter: password
+                default_target_path: admin_ui_dashboard
+                failure_path: login_admin
+                enable_csrf: false
+
             logout:
-                path: api_logout
+                path: logout_admin
+                target: login_admin
+
     access_control:
         - { path: ^/register$, roles: PUBLIC_ACCESS }
         - { path: ^/api/login$, roles: PUBLIC_ACCESS }
+
+        - { path: ^/login-admin$, roles: PUBLIC_ACCESS }
+        - { path: ^/logout-admin$, roles: PUBLIC_ACCESS }
+
         - { path: ^/api/tournaments, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/players, roles: PUBLIC_ACCESS, methods: [GET] }
+
+        - { path: ^/admin-ui, roles: ROLE_ADMIN }
         - { path: ^/admin, roles: ROLE_ADMIN }
+
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

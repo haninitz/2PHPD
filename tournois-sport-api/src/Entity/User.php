@@ -4,132 +4,166 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use DateTimeImmutable;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'notification', indexes: [new ORM\Index(name: 'idx_notification_user_created', columns: ['user_id', 'created_at'])])]
-class Notification
+#[ORM\Table(name: 'app_user', indexes: [new ORM\Index(name: 'idx_user_status', columns: ['status'])])]
+#[UniqueEntity(fields: ['emailAddress'], message: 'Cette adresse email est deja utilisee.')]
+#[UniqueEntity(fields: ['username'], message: 'Ce nom d\'utilisateur est deja pris.')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    public const STATUS_ACTIF = 'actif';
+    public const STATUS_SUSPENDU = 'suspendu';
+    public const STATUS_BANNI = 'banni';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Assert\NotNull]
-    private ?User $user = null;
-
-    #[ORM\ManyToOne(targetEntity: Tournament::class)]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
-    private ?Tournament $tournament = null;
-
-    #[ORM\ManyToOne(targetEntity: SportMatch::class)]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
-    private ?SportMatch $sportMatch = null;
-
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
-    private string $type = '';
+    #[Assert\Length(max: 100)]
+    private string $lastName = '';
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    private string $message = '';
+    #[Assert\Length(max: 100)]
+    private string $firstName = '';
 
-    #[ORM\Column]
-    private bool $isRead = false;
+    #[ORM\Column(length: 64, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 64)]
+    private string $username = '';
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private DateTimeImmutable $createdAt;
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
+    private string $emailAddress = '';
 
-    public function __construct()
-    {
-        $this->createdAt = new DateTimeImmutable();
-    }
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(length: 255)]
+    private string $password = '';
+
+    #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: [self::STATUS_ACTIF, self::STATUS_SUSPENDU, self::STATUS_BANNI])]
+    private string $status = self::STATUS_ACTIF;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getLastName(): string
     {
-        return $this->user;
+        return $this->lastName;
     }
 
-    public function setUser(User $user): self
+    public function setLastName(string $lastName): self
     {
-        $this->user = $user;
+        $this->lastName = trim($lastName);
 
         return $this;
     }
 
-    public function getTournament(): ?Tournament
+    public function getFirstName(): string
     {
-        return $this->tournament;
+        return $this->firstName;
     }
 
-    public function setTournament(?Tournament $tournament): self
+    public function setFirstName(string $firstName): self
     {
-        $this->tournament = $tournament;
+        $this->firstName = trim($firstName);
 
         return $this;
     }
 
-    public function getSportMatch(): ?SportMatch
+    public function getUsername(): string
     {
-        return $this->sportMatch;
+        return $this->username;
     }
 
-    public function setSportMatch(?SportMatch $sportMatch): self
+    public function setUsername(string $username): self
     {
-        $this->sportMatch = $sportMatch;
+        $this->username = trim($username);
 
         return $this;
     }
 
-    public function getType(): string
+    public function getEmailAddress(): string
     {
-        return $this->type;
+        return $this->emailAddress;
     }
 
-    public function setType(string $type): self
+    public function setEmailAddress(string $emailAddress): self
     {
-        $this->type = trim($type);
+        $this->emailAddress = strtolower(trim($emailAddress));
 
         return $this;
     }
 
-    public function getMessage(): string
+    public function getUserIdentifier(): string
     {
-        return $this->message;
+        return $this->emailAddress;
     }
 
-    public function setMessage(string $message): self
+    public function getRoles(): array
     {
-        $this->message = trim($message);
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_values(array_unique($roles));
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = array_values(array_unique($roles));
 
         return $this;
     }
 
-    public function isRead(): bool
+    public function getPassword(): string
     {
-        return $this->isRead;
+        return $this->password;
     }
 
-    public function setIsRead(bool $isRead): self
+    public function setPassword(string $password): self
     {
-        $this->isRead = $isRead;
+        $this->password = $password;
 
         return $this;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getSalt(): ?string
     {
-        return $this->createdAt;
+        return null;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->getRoles(), true);
     }
 }
