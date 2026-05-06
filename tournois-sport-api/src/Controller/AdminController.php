@@ -22,9 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class AdminController extends AbstractController
 {
-    /**
-     * @Route("/dashboard", name="admin_dashboard", methods={"GET"})
-     */
+    #[Route('/admin/dashboard', name: 'admin_dashboard', methods: ['GET'])]
     public function dashboard(EntityManagerInterface $entityManager): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -41,9 +39,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/registrations/{id}/confirm", name="admin_registration_confirm", methods={"PUT"})
-     */
+    #[Route('/admin/registrations/{id}/confirm', name: 'admin_registration_confirm', methods: ['PUT'])]
     public function confirmRegistration(?Registration $registration, EntityManagerInterface $entityManager): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -66,9 +62,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/tournaments/{id}/winner", name="admin_tournament_winner", methods={"PUT"})
-     */
+    #[Route('/admin/tournaments/{id}/winner', name: 'admin_tournament_winner', methods: ['PUT'])]
     public function setWinner(
         ?Tournament $tournament,
         Request $request,
@@ -117,9 +111,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/sport-matchs/{id}/scores", name="admin_match_scores", methods={"PUT"})
-     */
+    #[Route('/admin/sport-matchs/{id}/scores', name: 'admin_match_scores', methods: ['PUT'])]
     public function adminUpdateScores(
         ?SportMatch $match,
         Request $request,

@@ -8,7 +8,7 @@ use App\Entity\Tournament;
 use App\Service\TournamentStatusService;
 use PHPUnit\Framework\TestCase;
 
-final class TournamentStatusServiceTest extends TestCase
+final class TournamentsStatusServiceTest extends TestCase
 {
     public function testComputesStatusCorrectly(): void
     {

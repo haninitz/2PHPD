@@ -15,9 +15,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class AuthController extends AbstractController
 {
-    /**
-     * @Route("/register", name="api_register", methods={"POST"})
-     */
+    
+    #[Route('/register', name: 'api_register', methods: ['POST'])]
     public function register(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -61,9 +60,7 @@ final class AuthController extends AbstractController
         ], 201);
     }
 
-    /**
-     * @Route("/api/login", name="api_login", methods={"POST"})
-     */
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(): JsonResponse
     {
         $user = $this->getUser();

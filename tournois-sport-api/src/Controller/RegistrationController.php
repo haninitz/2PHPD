@@ -16,9 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class RegistrationController extends AbstractController
 {
-    /**
-     * @Route("/api/tournaments/{id}/registrations", name="api_registration_index", methods={"GET"})
-     */
+    #[Route('/api/tournaments/{id}/registrations', name: 'api_registration_index', methods: ['GET'])]
     public function index(?Tournament $tournament, EntityManagerInterface $entityManager): JsonResponse
     {
         if ($tournament === null) {
@@ -37,9 +35,7 @@ final class RegistrationController extends AbstractController
         return $this->json($data);
     }
 
-    /**
-     * @Route("/api/tournaments/{id}/registrations", name="api_registration_create", methods={"POST"})
-     */
+    #[Route('/api/tournaments/{id}/registrations', name: 'api_registration_create', methods: ['POST'])]
     public function create(
         ?Tournament $tournament,
         Request $request,
@@ -119,9 +115,7 @@ final class RegistrationController extends AbstractController
         return $this->json($this->normalizeRegistration($registration), 201);
     }
 
-    /**
-     * @Route("/api/tournaments/{idTournament}/registrations/{idRegistration}", name="api_registration_delete", methods={"DELETE"})
-     */
+    #[Route('/api/tournaments/{idTournament}/registrations/{idRegistration}', name: 'api_registration_delete', methods: ['DELETE'])]
     public function delete(int $idTournament, int $idRegistration, EntityManagerInterface $entityManager): JsonResponse
     {
         $tournament = $entityManager->getRepository(Tournament::class)->find($idTournament);

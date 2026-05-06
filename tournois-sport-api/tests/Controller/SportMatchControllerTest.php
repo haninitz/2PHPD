@@ -8,6 +8,7 @@ use App\Entity\SportMatch;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Routing\Attribute\Route;
 
 final class SportMatchControllerTest extends WebTestCase
 {

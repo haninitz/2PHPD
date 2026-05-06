@@ -19,8 +19,8 @@ final class AuthControllerTest extends WebTestCase
             content: json_encode([
                 'lastName' => 'Martin',
                 'firstName' => 'Eva',
-                'username' => 'eva',
-                'emailAddress' => 'eva@example.com',
+                'username' => 'user_'.uniqid(),
+                'emailAddress' => 'test_'.uniqid().'@example.com',
                 'password' => 'secret123',
             ], JSON_THROW_ON_ERROR)
         );

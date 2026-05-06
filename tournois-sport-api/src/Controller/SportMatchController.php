@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class SportMatchController extends AbstractController
 {
-    /**
-     * @Route("/api/tournaments/{id}/sport-matchs", name="api_sport_match_index", methods={"GET"})
-     */
+    #[Route('/api/tournaments/{id}/sport-matchs', name: 'api_sport_match_index', methods: ['GET'])]
     public function index(?Tournament $tournament, EntityManagerInterface $entityManager): JsonResponse
     {
         if ($tournament === null) {
@@ -40,9 +38,8 @@ final class SportMatchController extends AbstractController
         return $this->json($data);
     }
 
-    /**
-     * @Route("/api/tournaments/{id}/sport-matchs", name="api_sport_match_create", methods={"POST"})
-     */
+    
+    #[Route('/api/tournaments/{id}/sport-matchs', name: 'api_sport_match_create', methods: ['POST'])]
     public function create(
         ?Tournament $tournament,
         Request $request,
@@ -104,9 +101,7 @@ final class SportMatchController extends AbstractController
         return $this->json($this->normalizeMatch($match), 201);
     }
 
-    /**
-     * @Route("/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}", name="api_sport_match_show", methods={"GET"})
-     */
+    #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_show', methods: ['GET'])]
     public function show(int $idTournament, int $idSportMatchs, EntityManagerInterface $entityManager): JsonResponse
     {
         $match = $entityManager->getRepository(SportMatch::class)->find($idSportMatchs);
@@ -122,9 +117,7 @@ final class SportMatchController extends AbstractController
         return $this->json($this->normalizeMatch($match));
     }
 
-    /**
-     * @Route("/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}", name="api_sport_match_update", methods={"PUT"})
-     */
+    #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_update', methods: ['PUT'])]
     public function update(
         int $idTournament,
         int $idSportMatchs,
@@ -170,9 +163,7 @@ final class SportMatchController extends AbstractController
         return $this->json($this->normalizeMatch($updated));
     }
 
-    /**
-     * @Route("/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}", name="api_sport_match_delete", methods={"DELETE"})
-     */
+    #[Route('/api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}', name: 'api_sport_match_delete', methods: ['DELETE'])]
     public function delete(int $idTournament, int $idSportMatchs, EntityManagerInterface $entityManager): JsonResponse
     {
         $match = $entityManager->getRepository(SportMatch::class)->find($idSportMatchs);
