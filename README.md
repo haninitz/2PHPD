@@ -125,8 +125,18 @@ tests/
 
 ### Pour voir les routes
 
+#### Depuis la console
+
 ```bash
 php bin/console debug:router
+```
+
+#### Depuis le swagger
+
+Accéder à cette route :
+
+```bash
+http://127.0.0.1:8000/swagger.html
 ```
 
 ### Pour effectuer les tests

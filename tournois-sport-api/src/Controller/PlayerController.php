@@ -13,14 +13,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * @Route("/api/players")
- */
+#[Route('/api/players')]
 final class PlayerController extends AbstractController
 {
-    /**
-     * @Route("", name="api_player_index", methods={"GET"})
-     */
+    #[Route('', name: 'api_player_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
         $players = $entityManager->getRepository(User::class)->findBy([], ['id' => 'ASC']);
@@ -33,9 +29,7 @@ final class PlayerController extends AbstractController
         return $this->json($data);
     }
 
-    /**
-     * @Route("/{id}", name="api_player_show", methods={"GET"})
-     */
+    #[Route('/{id}', name: 'api_player_show', methods: ['GET'])]
     public function show(?User $user): JsonResponse
     {
         if ($user === null) {
@@ -45,9 +39,7 @@ final class PlayerController extends AbstractController
         return $this->json($this->normalizeUser($user));
     }
 
-    /**
-     * @Route("/{id}", name="api_player_update", methods={"PUT"})
-     */
+    #[Route('/{id}', name: 'api_player_update', methods: ['PUT'])]
     public function update(
         ?User $user,
         Request $request,
@@ -113,9 +105,7 @@ final class PlayerController extends AbstractController
         return $this->json($this->normalizeUser($user));
     }
 
-    /**
-     * @Route("/{id}", name="api_player_delete", methods={"DELETE"})
-     */
+    #[Route('/{id}', name: 'api_player_delete', methods: ['DELETE'])]
     public function delete(?User $user, EntityManagerInterface $entityManager): JsonResponse
     {
         if ($user === null) {

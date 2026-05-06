@@ -74,9 +74,7 @@ final class AuthController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/api/me", name="api_me", methods={"GET"})
-     */
+    #[Route('/api/me', name: 'api_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
         $user = $this->getUser();
@@ -87,9 +85,7 @@ final class AuthController extends AbstractController
         return $this->json($this->normalizeUser($user));
     }
 
-    /**
-     * @Route("/api/logout", name="api_logout", methods={"POST"})
-     */
+    #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function logout(): void
     {
         throw new \LogicException('Cette methode est interceptee par le firewall logout.');

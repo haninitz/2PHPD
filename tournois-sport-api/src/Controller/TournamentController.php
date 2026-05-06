@@ -15,14 +15,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * @Route("/api/tournaments")
- */
+#[Route('/api/tournaments')]
 final class TournamentController extends AbstractController
 {
-    /**
-     * @Route("", name="api_tournament_index", methods={"GET"})
-     */
+    #[Route('', name: 'api_tournament_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager, TournamentStatusService $statusService): JsonResponse
     {
         $tournaments = $entityManager->getRepository(Tournament::class)->findBy([], ['startDate' => 'DESC']);
@@ -35,9 +31,7 @@ final class TournamentController extends AbstractController
         return $this->json($data);
     }
 
-    /**
-     * @Route("", name="api_tournament_create", methods={"POST"})
-     */
+    #[Route('', name: 'api_tournament_create', methods: ['POST'])]
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -87,9 +81,7 @@ final class TournamentController extends AbstractController
         return $this->json($this->normalizeTournament($tournament, $statusService), 201);
     }
 
-    /**
-     * @Route("/{id}", name="api_tournament_show", methods={"GET"})
-     */
+    #[Route('/{id}', name: 'api_tournament_show', methods: ['GET'])]
     public function show(?Tournament $tournament, TournamentStatusService $statusService): JsonResponse
     {
         if ($tournament === null) {
@@ -99,9 +91,7 @@ final class TournamentController extends AbstractController
         return $this->json($this->normalizeTournament($tournament, $statusService));
     }
 
-    /**
-     * @Route("/{id}", name="api_tournament_update", methods={"PUT"})
-     */
+    #[Route('/{id}', name: 'api_tournament_update', methods: ['PUT'])]
     public function update(
         ?Tournament $tournament,
         Request $request,
@@ -172,9 +162,7 @@ final class TournamentController extends AbstractController
         return $this->json($this->normalizeTournament($tournament, $statusService));
     }
 
-    /**
-     * @Route("/{id}", name="api_tournament_delete", methods={"DELETE"})
-     */
+    #[Route('/{id}', name: 'api_tournament_delete', methods: ['DELETE'])]
     public function delete(?Tournament $tournament, EntityManagerInterface $entityManager): JsonResponse
     {
         if ($tournament === null) {

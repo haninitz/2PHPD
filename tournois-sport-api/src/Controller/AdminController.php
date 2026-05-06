@@ -17,9 +17,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/admin")
- */
+
+#[Route('/admin')]
 final class AdminController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'admin_dashboard', methods: ['GET'])]

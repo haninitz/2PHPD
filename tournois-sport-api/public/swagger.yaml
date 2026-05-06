@@ -1,0 +1,1005 @@
+openapi: 3.0.3
+info:
+  title: Tournois Sport API
+  description: API de gestion de tournois sportifs avec authentification, administration, joueurs, inscriptions, matchs et tournois.
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:8000
+    description: Serveur local Symfony
+
+tags:
+  - name: Authentification
+  - name: Joueurs
+  - name: Tournois
+  - name: Inscriptions
+  - name: Matchs
+  - name: Administration API
+  - name: Administration UI
+
+paths:
+  /:
+    get:
+      tags: [Administration UI]
+      summary: Page d'accueil
+      description: Redirige ou affiche la page d'accueil du projet.
+      responses:
+        '200':
+          description: Page affichée
+
+  /login-admin:
+    get:
+      tags: [Administration UI]
+      summary: Afficher la page de connexion admin
+      responses:
+        '200':
+          description: Formulaire HTML de connexion admin
+    post:
+      tags: [Administration UI]
+      summary: Connexion administrateur via formulaire
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [emailAddress, password]
+              properties:
+                emailAddress:
+                  type: string
+                  example: admin@example.com
+                password:
+                  type: string
+                  example: adminpass
+      responses:
+        '302':
+          description: Redirection après connexion
+        '401':
+          description: Identifiants invalides
+
+  /logout-admin:
+    get:
+      tags: [Administration UI]
+      summary: Déconnexion administrateur
+      responses:
+        '302':
+          description: Redirection vers la page de connexion
+    post:
+      tags: [Administration UI]
+      summary: Déconnexion administrateur
+      responses:
+        '302':
+          description: Redirection vers la page de connexion
+
+  /register:
+    post:
+      tags: [Authentification]
+      summary: Créer un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Données invalides
+        '422':
+          description: Email ou username déjà utilisé
+
+  /api/login:
+    post:
+      tags: [Authentification]
+      summary: Connexion utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Connexion réussie
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Identifiants invalides
+
+  /api/me:
+    get:
+      tags: [Authentification]
+      summary: Récupérer l'utilisateur connecté
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Utilisateur connecté
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Non authentifié
+
+  /api/logout:
+    post:
+      tags: [Authentification]
+      summary: Déconnexion utilisateur
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Déconnexion réussie
+        '401':
+          description: Non authentifié
+
+  /api/players:
+    get:
+      tags: [Joueurs]
+      summary: Lister les joueurs
+      responses:
+        '200':
+          description: Liste des joueurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /api/players/{id}:
+    get:
+      tags: [Joueurs]
+      summary: Afficher un joueur
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Joueur trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Joueur introuvable
+    put:
+      tags: [Joueurs]
+      summary: Modifier un joueur
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Joueur modifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Joueur introuvable
+    delete:
+      tags: [Joueurs]
+      summary: Supprimer un joueur
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Joueur supprimé
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Joueur introuvable
+
+  /api/tournaments:
+    get:
+      tags: [Tournois]
+      summary: Lister les tournois
+      responses:
+        '200':
+          description: Liste des tournois
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+    post:
+      tags: [Tournois]
+      summary: Créer un tournoi
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentCreateRequest'
+      responses:
+        '201':
+          description: Tournoi créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '400':
+          description: Données invalides
+        '401':
+          description: Non authentifié
+
+  /api/tournaments/{id}:
+    get:
+      tags: [Tournois]
+      summary: Afficher un tournoi
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Tournoi trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Tournoi introuvable
+    put:
+      tags: [Tournois]
+      summary: Modifier un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentUpdateRequest'
+      responses:
+        '200':
+          description: Tournoi modifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Tournoi introuvable
+    delete:
+      tags: [Tournois]
+      summary: Supprimer un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Tournoi supprimé
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Tournoi introuvable
+
+  /api/tournaments/{id}/registrations:
+    get:
+      tags: [Inscriptions]
+      summary: Lister les inscriptions d'un tournoi
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Liste des inscriptions du tournoi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Registration'
+        '404':
+          description: Tournoi introuvable
+    post:
+      tags: [Inscriptions]
+      summary: Inscrire un joueur à un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationCreateRequest'
+      responses:
+        '201':
+          description: Inscription créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '400':
+          description: Données invalides
+        '401':
+          description: Non authentifié
+        '404':
+          description: Tournoi ou joueur introuvable
+        '422':
+          description: Inscription impossible
+
+  /api/tournaments/{idTournament}/registrations/{idRegistration}:
+    delete:
+      tags: [Inscriptions]
+      summary: Annuler une inscription à un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdTournament'
+        - $ref: '#/components/parameters/IdRegistration'
+      responses:
+        '204':
+          description: Inscription annulée
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Tournoi ou inscription introuvable
+
+  /api/tournaments/{id}/sport-matchs:
+    get:
+      tags: [Matchs]
+      summary: Lister les matchs d'un tournoi
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Liste des matchs du tournoi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SportMatch'
+        '404':
+          description: Tournoi introuvable
+    post:
+      tags: [Matchs]
+      summary: Créer un match dans un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SportMatchCreateRequest'
+      responses:
+        '201':
+          description: Match créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SportMatch'
+        '400':
+          description: Données invalides
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Tournoi ou joueurs introuvables
+        '422':
+          description: Les joueurs doivent avoir une inscription confirmée
+
+  /api/tournaments/{idTournament}/sport-matchs/{idSportMatchs}:
+    get:
+      tags: [Matchs]
+      summary: Afficher un match
+      parameters:
+        - $ref: '#/components/parameters/IdTournament'
+        - $ref: '#/components/parameters/IdSportMatchs'
+      responses:
+        '200':
+          description: Match trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SportMatch'
+        '404':
+          description: Match introuvable
+    put:
+      tags: [Matchs]
+      summary: Mettre à jour les scores d'un match
+      description: Seul le joueur concerné peut modifier son propre score, ou un administrateur.
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdTournament'
+        - $ref: '#/components/parameters/IdSportMatchs'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SportMatchScoreUpdateRequest'
+      responses:
+        '200':
+          description: Score mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SportMatch'
+        '400':
+          description: Données invalides
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Match introuvable
+        '422':
+          description: Mise à jour impossible selon les règles métier
+    delete:
+      tags: [Matchs]
+      summary: Supprimer un match
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdTournament'
+        - $ref: '#/components/parameters/IdSportMatchs'
+      responses:
+        '204':
+          description: Match supprimé
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès refusé
+        '404':
+          description: Match introuvable
+
+  /admin/admin/dashboard:
+    get:
+      tags: [Administration API]
+      summary: Dashboard admin API
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Données du dashboard admin
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès réservé aux admins
+
+  /admin/admin/registrations/{id}/confirm:
+    put:
+      tags: [Administration API]
+      summary: Confirmer une inscription
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Inscription confirmée
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès réservé aux admins
+        '404':
+          description: Inscription introuvable
+
+  /admin/admin/tournaments/{id}/winner:
+    put:
+      tags: [Administration API]
+      summary: Définir le vainqueur d'un tournoi
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [winnerId]
+              properties:
+                winnerId:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Vainqueur défini
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès réservé aux admins
+        '404':
+          description: Tournoi ou utilisateur introuvable
+
+  /admin/admin/sport-matchs/{id}/scores:
+    put:
+      tags: [Administration API]
+      summary: Modifier les scores d'un match en tant qu'admin
+      description: Lorsqu'un admin modifie les scores, aucune notification n'est envoyée.
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SportMatchScoreUpdateRequest'
+      responses:
+        '200':
+          description: Scores modifiés
+        '401':
+          description: Non authentifié
+        '403':
+          description: Accès réservé aux admins
+        '404':
+          description: Match introuvable
+
+  /admin-ui:
+    get:
+      tags: [Administration UI]
+      summary: Dashboard administrateur HTML
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Page HTML du dashboard administrateur
+        '403':
+          description: Accès réservé aux admins
+
+  /admin-ui/registrations/{id}/confirm:
+    post:
+      tags: [Administration UI]
+      summary: Confirmer une inscription depuis l'interface HTML
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '302':
+          description: Redirection vers le dashboard admin
+        '403':
+          description: Accès réservé aux admins
+
+  /admin-ui/matches/{id}/scores:
+    post:
+      tags: [Administration UI]
+      summary: Modifier les scores depuis l'interface HTML
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                scorePlayer1:
+                  type: integer
+                  example: 10
+                scorePlayer2:
+                  type: integer
+                  example: 8
+      responses:
+        '302':
+          description: Redirection vers le dashboard admin
+        '403':
+          description: Accès réservé aux admins
+
+  /admin-ui/tournaments/{id}/winner:
+    post:
+      tags: [Administration UI]
+      summary: Définir le vainqueur depuis l'interface HTML
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [winnerId]
+              properties:
+                winnerId:
+                  type: integer
+                  example: 2
+      responses:
+        '302':
+          description: Redirection vers le dashboard admin
+        '403':
+          description: Accès réservé aux admins
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    IdTournament:
+      name: idTournament
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    IdRegistration:
+      name: idRegistration
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 3
+    IdSportMatchs:
+      name: idSportMatchs
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 2
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - emailAddress
+        - password
+      properties:
+        emailAddress:
+          type: string
+          format: email
+          example: chloe@example.com
+        password:
+          type: string
+          example: password123
+
+    RegisterRequest:
+      type: object
+      required:
+        - lastName
+        - firstName
+        - username
+        - emailAddress
+        - password
+      properties:
+        lastName:
+          type: string
+          example: Dupont
+        firstName:
+          type: string
+          example: Chloé
+        username:
+          type: string
+          example: chloe
+        emailAddress:
+          type: string
+          format: email
+          example: chloe@example.com
+        password:
+          type: string
+          example: password123
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        lastName:
+          type: string
+          example: Dupont
+        firstName:
+          type: string
+          example: Chloé
+        username:
+          type: string
+          example: chloe
+        emailAddress:
+          type: string
+          format: email
+          example: chloe@example.com
+        status:
+          type: string
+          example: actif
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        lastName:
+          type: string
+          example: Dupont
+        firstName:
+          type: string
+          example: Chloé
+        username:
+          type: string
+          example: chloe
+        emailAddress:
+          type: string
+          format: email
+          example: chloe@example.com
+        roles:
+          type: array
+          items:
+            type: string
+          example: [ROLE_USER]
+        status:
+          type: string
+          example: actif
+
+    TournamentCreateRequest:
+      type: object
+      required:
+        - tournamentName
+        - startDate
+        - endDate
+        - description
+        - maxParticipants
+        - sport
+      properties:
+        tournamentName:
+          type: string
+          example: Tournoi de Football
+        startDate:
+          type: string
+          format: date
+          example: '2026-06-01'
+        endDate:
+          type: string
+          format: date
+          example: '2026-06-10'
+        location:
+          type: string
+          nullable: true
+          example: Paris
+        description:
+          type: string
+          example: Tournoi sportif organisé entre joueurs.
+        maxParticipants:
+          type: integer
+          example: 16
+        sport:
+          type: string
+          example: Football
+        organizerId:
+          type: integer
+          example: 1
+
+    TournamentUpdateRequest:
+      type: object
+      properties:
+        tournamentName:
+          type: string
+          example: Tournoi de Football modifié
+        startDate:
+          type: string
+          format: date
+          example: '2026-06-01'
+        endDate:
+          type: string
+          format: date
+          example: '2026-06-10'
+        location:
+          type: string
+          nullable: true
+          example: Paris
+        description:
+          type: string
+          example: Nouvelle description du tournoi.
+        maxParticipants:
+          type: integer
+          example: 20
+        sport:
+          type: string
+          example: Football
+        winnerId:
+          type: integer
+          nullable: true
+          example: 2
+
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tournamentName:
+          type: string
+          example: Tournoi de Football
+        startDate:
+          type: string
+          format: date
+          example: '2026-06-01'
+        endDate:
+          type: string
+          format: date
+          example: '2026-06-10'
+        location:
+          type: string
+          nullable: true
+          example: Paris
+        description:
+          type: string
+          example: Tournoi sportif organisé entre joueurs.
+        maxParticipants:
+          type: integer
+          example: 16
+        status:
+          type: string
+          example: a venir
+        sport:
+          type: string
+          example: Football
+        organizer:
+          $ref: '#/components/schemas/UserShort'
+        winner:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/UserShort'
+
+    RegistrationCreateRequest:
+      type: object
+      required:
+        - playerId
+      properties:
+        playerId:
+          type: integer
+          example: 1
+
+    Registration:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        player:
+          $ref: '#/components/schemas/UserShort'
+        tournament:
+          $ref: '#/components/schemas/TournamentShort'
+        registrationDate:
+          type: string
+          format: date
+          example: '2026-05-06'
+        status:
+          type: string
+          example: en attente
+
+    SportMatchCreateRequest:
+      type: object
+      required:
+        - player1Id
+        - player2Id
+        - matchDate
+      properties:
+        player1Id:
+          type: integer
+          example: 1
+        player2Id:
+          type: integer
+          example: 2
+        matchDate:
+          type: string
+          format: date
+          example: '2026-06-03'
+
+    SportMatchScoreUpdateRequest:
+      type: object
+      properties:
+        scorePlayer1:
+          type: integer
+          nullable: true
+          example: 10
+        scorePlayer2:
+          type: integer
+          nullable: true
+          example: 8
+
+    SportMatch:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tournament:
+          $ref: '#/components/schemas/TournamentShort'
+        player1:
+          $ref: '#/components/schemas/UserShort'
+        player2:
+          $ref: '#/components/schemas/UserShort'
+        matchDate:
+          type: string
+          format: date
+          example: '2026-06-03'
+        scorePlayer1:
+          type: integer
+          nullable: true
+          example: 10
+        scorePlayer2:
+          type: integer
+          nullable: true
+          example: 8
+        status:
+          type: string
+          example: en attente
+
+    UserShort:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: chloe
+        emailAddress:
+          type: string
+          format: email
+          example: chloe@example.com
+
+    TournamentShort:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tournamentName:
+          type: string
+          example: Tournoi de Football
+        sport:
+          type: string
+          example: Football
